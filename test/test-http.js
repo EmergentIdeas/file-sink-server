@@ -56,13 +56,17 @@ async function addTests() {
 			let response = await axios.get(`http://localhost:${port}/store1/$info`)
 			assert.equal(response.data.children.length, 1)
 		})
+		it('read head', async function() {
+			let response = await axios.head(`http://localhost:${port}/store1/test1.txt`)
+			assert.equal(response.headers['content-length'], '7')
+		})
 		it('read hash', async function() {
-			let response = await axios.get(`http://localhost:${port}/store1/$hash/test1.txt`)
+			let response = await axios.get(`http://localhost:${port}/store1/test1.txt/$hash`)
 			assert.equal(response.data, await sink.createHash('test1.txt'))
 		})
 		it('read hash, missing file', async function() {
 			try {
-				let response = await axios.get(`http://localhost:${port}/store1/$hash/text1.txt`)
+				await axios.get(`http://localhost:${port}/store1/text1.txt/$hash`)
 			}
 			catch(e) {
 				let status = e.response.status
@@ -73,7 +77,7 @@ async function addTests() {
 		})
 		it('read non-existant file', async function() {
 			try {
-				let response = await axios.get(`http://localhost:${port}/store1/test2.txt`)
+				await axios.get(`http://localhost:${port}/store1/test2.txt`)
 			}
 			catch(e) {
 				assert.equal(e.response.status, 404)
@@ -116,7 +120,7 @@ async function addTests() {
 
 			let response = await axios({
 				method: 'get',
-				url: `http://localhost:${port}/store1/\$info/${filename}`
+				url: `http://localhost:${port}/store1/${filename}/\$info`
 			})
 
 			assert.equal(response.status, 200)
@@ -127,7 +131,7 @@ async function addTests() {
 
 			let response = await axios({
 				method: 'get',
-				url: `http://localhost:${port}/store1/\$info/${filename}/`,
+				url: `http://localhost:${port}/store1/${filename}/\$info/`,
 				headers: {
 					'Content-Type': 'application/octet-stream'
 				}
@@ -135,6 +139,43 @@ async function addTests() {
 
 			assert.equal(response.status, 200)
 			assert.equal(response.data.stat.size, testData.length)
+		})
+		it('patch write', async function() {
+			let filename = 'campfire.jpg'
+
+			let response = await axios({
+				method: 'patch',
+				url: `http://localhost:${port}/store1/${filename}`,
+				data: '123',
+				headers: {
+					'Content-Type': 'application/octet-stream',
+					'Position': '1'
+				}
+			})
+
+			assert.equal(response.status, 200)
+			assert.equal((await sink.getFullFileInfo(filename)).stat.size, testData.length)
+			
+			response = await axios.get(`http://localhost:${port}/store1/${filename}`)
+			assert.equal(response.data, 'a123' + testData.substring(4))
+			
+
+			response = await axios({
+				method: 'patch',
+				url: `http://localhost:${port}/store1/${filename}`,
+				data: '123',
+				headers: {
+					'Content-Type': 'application/octet-stream',
+					'Position': '7'
+				}
+			})
+			let contentResponse = await axios.get(`http://localhost:${port}/store1/${filename}`)
+			let fileInfo = await sink.getFullFileInfo(filename)
+			assert.equal(contentResponse.status, 200)
+			assert.equal(fileInfo.stat.size, testData.length + 3)
+			
+			response = await axios.get(`http://localhost:${port}/store1/${filename}`)
+			assert.equal(response.data, 'a123' + testData.substring(4) + '123')
 		})
 		it('mkdir', async function() {
 			let filename = 'dir2'
@@ -153,7 +194,7 @@ async function addTests() {
 		})
 		it('read hash directory', async function() {
 			try {
-				let response = await axios.get(`http://localhost:${port}/store1/$hash/dir2`)
+				await axios.get(`http://localhost:${port}/store1/dir2/$hash`)
 			}
 			catch(e) {
 				let status = e.response.status
@@ -180,7 +221,7 @@ async function addTests() {
 		it('write file to directory', async function() {
 			let filename = 'campfire.jpg'
 			try {
-				let response = await axios({
+				await axios({
 					method: 'put',
 					url: `http://localhost:${port}/store1/dir2`,
 					data: testSink.readStream(filename),
@@ -208,7 +249,7 @@ async function addTests() {
 		})
 		it('mkdir for existing file', async function() {
 			try {
-				let response = await axios({
+				await axios({
 					method: 'put',
 					url: `http://localhost:${port}/store1/campfire.jpg`,
 					headers: {
@@ -233,100 +274,7 @@ async function addTests() {
 			}
 			server.close()
 		})
-		/*
-		it("directories", function() {
-			let info = {
-				parent: 'theparent',
-				relPath: 'relpath',
-				stat: {},
-				directory: true
-			}
-			
-			let attrs = fss.genHTTPHeaderAttributes(info)
-			assert.equal(attrs['File-Type'], 'directory')
-			assert.isUndefined(attrs['Child-Count'])
-			
-			info.children = [{}, {}, {}]
-			attrs = fss.genHTTPHeaderAttributes(info)
-			assert.equal(attrs['File-Type'], 'directory')
-			assert.equal(attrs['Child-Count'], 3)
-		})
-
-		it("files", function() {
-			let info = {
-				name: 'something.html',
-				parent: 'theparent',
-				relPath: 'relpath',
-				stat: {
-					size: 1234
-				},
-				directory: false
-			}
-			
-			let attrs = fss.genHTTPHeaderAttributes(info, true)
-			assert.equal(attrs['File-Type'], 'file')
-			assert.equal(attrs['Content-Length'], 1234)
-			assert.equal(attrs['Content-Type'], 'text/html')
-			assert.isUndefined(attrs['Child-Count'])
-			
-		})
-		*/
 	})
-	/*
-
-	describe("error functions", function() {
-		it("file not found", function(done) {
-			fss.getInfo = async (path) => {
-				throw new Error("Could not find the file. Freak out.")
-			}
-		
-			let req = {
-				params: {
-					"0": 'test'
-				}
-			}
-			fss.infoGET(req, res, (err) => {
-				if(err != null) {
-					done()
-				}	
-				else {
-					done(new Error('File was not found but no error was created.'))
-				}
-			})
-		})
-
-		it("file found", function(done) {
-			fss.getInfo = async (path) => {
-				return {
-					name: 'name',
-					stat: {}
-				}
-			}
-		
-			let req = {
-				params: {
-					"0": 'test'
-				}
-			}
-			let handled = false
-			fss.infoGET(req, res, (err) => {
-				if(err) {
-					handled = true
-					done(new Error('File should have been found but error was created.'))
-				}	
-			})
-			setTimeout(() => {
-				if(!handled) {
-					done()
-				}
-			}, 10)
-
-		})
-		
-	})
-
-	*/
-
 }
 
 addTests()
