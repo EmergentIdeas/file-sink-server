@@ -1,0 +1,1 @@
+module.exports = ['dev', 'ino', 'mode', 'nlink', 'uid', 'gid', 'rdev', 'blocks', 'blksize']
