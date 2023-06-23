@@ -5,19 +5,11 @@
 	"main": "index.js",
 	"scripts": {
 		"test": "node_modules/mocha/bin/mocha",
-		"less-build": "npx lessc --source-map --source-map-include-source less/pages.less public/css/pages.css",
-		"less-compress": "uglifycss public/css/pages.css > public/css/pages.min.css",
-		"client-js-compress": "uglifyjs public/js/pages.js -o public/js/pages.min.js -c --source-map url=public/js/pages.min.js.map",
-		"client-js-build": "npm run client-js-pages-build",
-		"client-js-pages-build": "npx browserify client-js/pages.js --debug | npx exorcist public/js/pages.js.map > public/js/pages.js",
-		"dev-less-watch": "onchange 'less/**/*.less' -- npm run less-build",
-		"dev-client-js-watch": "onchange 'client-js/**/*.js' -- npm run client-js-build",
 		"dev-server-js-watch": "onchange 'server-js/**/*.js' -- pm2 restart $npm_package_name-web",
 		"start": "node ./web-server.js",
 		"testDebug": "node --inspect-brk node_modules/mocha/bin/mocha",
-		"bg": "parallelshell 'npm run dev-less-watch' 'npm run dev-client-js-watch'",
-		"pm2-bg": "parallelshell 'npm run dev-less-watch' 'npm run dev-client-js-watch' 'npm run dev-server-js-watch'",
-		"dev": "parallelshell 'npm run start' 'npm run dev-less-watch' 'npm run dev-client-js-watch'"
+		"pm2-bg": "parallelshell 'npm run dev-server-js-watch'",
+		"dev": "parallelshell 'npm run start'"
 	},
 	"keywords": [],
 	"author": "",

@@ -19,6 +19,7 @@ module.exports = function(app) {
 	})
 	publicServer.addToRouter(sinkRouter)
 	app.use('/public', sinkRouter)
+	app.use(sinkRouter)
 	
 	
 
