@@ -1,8 +1,8 @@
 {
 	"name": "file-sink-server",
 	"version": "1.0.0",
-	"description": "",
-	"main": "client-js/index.js",
+	"description": "Populates an express router to serve and update files based on a file-sink access layer",
+	"main": "index.js",
 	"scripts": {
 		"test": "node_modules/mocha/bin/mocha",
 		"less-build": "npx lessc --source-map --source-map-include-source less/pages.less public/css/pages.css",
@@ -36,7 +36,7 @@
 		"onchange": "^3.2.1",
 		"parallelshell": "3.0.1",
 		"uglify-js": "^3.6.0",
-		"webhandle": "^1.0.26"
+		"webhandle": "1.0.27"
 	},
 	"browserify": {
 		"transform": [
@@ -44,14 +44,14 @@
 		]
 	},
 	"files": [
-		"/client-js/index.js",
-		"/less/components.less",
-		"/public"
+		"/index.js",
+		"/lib"
 	],
 	"dependencies": {
 		"mime": "^3.0.0"
 	},
 	"peerDependencies": {
-		"file-sink": "^1.0.8"
+		"file-sink": "^1.0.8",
+		"webhandle": "^1.0.27"
 	}
 }

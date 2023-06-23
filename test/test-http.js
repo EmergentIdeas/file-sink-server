@@ -1,11 +1,11 @@
 require('mocha')
 var expect = require('chai').expect
 var assert = require('chai').assert
-const FileSinkServer = require('../server-js/file-sink-server')
+const FileSinkServer = require('../lib/file-sink-server')
 const FileSink = require('file-sink')
 const fs = require('fs')
 const axios = require('axios')
-let disallowed = require('../server-js/disallowed-stat-attributes')
+let disallowed = require('../lib/disallowed-stat-attributes')
 
 let dirName = fs.mkdtempSync('/tmp/filesinkservertest')
 console.log(`temporary directory: ${dirName}`)
@@ -43,7 +43,7 @@ async function addTests() {
 
 
 
-	describe("requested data", function() {
+	function addTests() {
 		it('read file', async function() {
 			let response = await axios.get(`http://localhost:${port}/store1/test1.txt`)
 			assert.equal(response.data, testData)
@@ -265,6 +265,83 @@ async function addTests() {
 			throw new Error()	
 
 		})
+		it('write info into directory', async function() {
+			let filename = 'campfire.jpg'
+
+			let response = await axios({
+				method: 'put',
+				url: `http://localhost:${port}/store1/dir2/${filename}`,
+				data: testSink.readStream(filename),
+				headers: {
+					'Content-Type': 'application/octet-stream'
+				}
+			})
+
+			assert.equal(response.status, 200)
+			assert.equal(await sink.createHash('dir2/' + filename), await testSink.createHash(filename))
+		})
+		it('delete file', async function() {
+			await axios({
+				method: 'delete',
+				url: `http://localhost:${port}/store1/campfire.jpg`,
+			})
+			try {
+				await axios({
+					method: 'get',
+					url: `http://localhost:${port}/store1/campfire.jpg`,
+				})
+			}
+			catch(e) {
+				let status = e.response.status
+				assert.isTrue(status == 404)
+				return
+			}
+			throw new Error()	
+
+		})
+		it('delete directory', async function() {
+			try {
+				await axios({
+					method: 'delete',
+					url: `http://localhost:${port}/store1/dir2`,
+					headers: {
+						Recursive: 'false'
+					}
+				})
+			}
+			catch(e) {
+				// the delete should return an error code
+				let status = e.response.status
+				assert.isTrue(status == 409)
+			}
+			
+			// We shouldn't get an error here because the directory still exists
+			await axios({
+				method: 'get',
+				url: `http://localhost:${port}/store1/dir2/$info`,
+			})
+
+		})
+		it('delete directory', async function() {
+			await axios({
+				method: 'delete',
+				url: `http://localhost:${port}/store1/dir2`
+			})
+			try {
+				await axios({
+					method: 'get',
+					url: `http://localhost:${port}/store1/dir2/$info`,
+				})
+				// We should get an error because the directory no longer exists
+			}
+			catch(e) {
+				let status = e.response.status
+				assert.isTrue(status == 404)
+				return
+			}
+			throw new Error()	
+
+		})
 		it('shutdown', async function() {
 			try {
 				await sink.rm('', {recursive: true})
@@ -274,6 +351,10 @@ async function addTests() {
 			}
 			server.close()
 		})
+	}
+
+	describe("requested data, initial setup", function() {
+		addTests()
 	})
 }
 

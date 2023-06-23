@@ -2,7 +2,7 @@ const path = require('path')
 const express = require('express');
 const webhandle = require('webhandle');
 const FileSink = require('file-sink')
-const FileSinkServer = require('./file-sink-server')
+const FileSinkServer = require('../lib/file-sink-server')
 
 const filog = require('filter-log')
 let log

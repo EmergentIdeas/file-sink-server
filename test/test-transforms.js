@@ -1,10 +1,10 @@
 require('mocha')
 var expect = require('chai').expect
 var assert = require('chai').assert
-const FileSinkServer = require('../server-js/file-sink-server')
+const FileSinkServer = require('../lib/file-sink-server')
 
 let fss = new FileSinkServer()
-let disallowed = require('../server-js/disallowed-stat-attributes')
+let disallowed = require('../lib/disallowed-stat-attributes')
 
 let res = {
 	end: () => {
