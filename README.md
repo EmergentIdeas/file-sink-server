@@ -6,8 +6,8 @@ Lets express read and write files using normal RESTful HTTP verbs.
 
 I want to use something else I wrote, [FileSink](https://www.npmjs.com/package/file-sink), to abstract
 away just a little bit of the file system interface. I want callers to be able to read and write "files"
-without needing to know where specifically on disk they're writing to even what they're really writing
-to. Could be file system, http, AWS S3, indexeddb, mongodb, or whatever. The caller shouldn't need to
+without needing to know where, specifically, on disk they're writing to, or even what they're really writing
+to. It could be a file system, http, AWS S3, indexeddb, mongodb, or whatever. The caller shouldn't need to
 know how to connect to the underlying resource, how to encrypt/decrypt, or anything more than the relative
 path.
 
@@ -26,7 +26,7 @@ npm install file-sink-server
 ## Usage
 
 ```
-// Serves the contents of a directory name "public" within the current directory
+// Serves the contents of a directory named "public" within the current directory
 const port = 3001
 const express = require('express')
 const FileSink = require('file-sink')
