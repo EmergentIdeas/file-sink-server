@@ -85,6 +85,21 @@ async function addTests() {
 			}
 			throw new Error()	
 		})
+		it('write blank file', async function() {
+			let filename = 'blank.txt'
+
+			let response = await axios({
+				method: 'put',
+				url: `http://localhost:${port}/store1/${filename}`,
+				data: Buffer.from(''),
+				headers: {
+					'Content-Type': 'application/octet-stream'
+				}
+			})
+
+			assert.equal(response.status, 200)
+			assert.equal(0, (await sink.getFullFileInfo(filename)).stat.size)
+		})
 		it('write info', async function() {
 			let filename = 'campfire.jpg'
 
