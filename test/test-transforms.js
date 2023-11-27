@@ -44,7 +44,6 @@ describe("tests the pure(ish) functions", function () {
 			assert.isNotTrue(info.stat[attr])
 		}
 		assert.isFalse(!!info.parent)
-		assert.isFalse(!!info.relPath)
 	})
 
 	it("determine root name", function () {

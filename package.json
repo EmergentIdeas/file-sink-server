@@ -1,6 +1,6 @@
 {
 	"name": "file-sink-server",
-	"version": "1.0.4",
+	"version": "1.0.5",
 	"description": "Populates an express router to serve and update files based on a file-sink access layer",
 	"main": "index.js",
 	"scripts": {
@@ -48,7 +48,7 @@
 		"mime": "^3.0.0"
 	},
 	"peerDependencies": {
-		"file-sink": "^1.0.10",
+		"file-sink": "^1.0.12",
 		"webhandle": "^1.0.27"
 	}
 }

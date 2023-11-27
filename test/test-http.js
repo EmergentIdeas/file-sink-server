@@ -353,6 +353,26 @@ async function addTests() {
 			assert.equal(response.status, 200)
 			assert.equal(await sink.createHash('dir2/' + filename), await testSink.createHash(filename))
 		})
+		it('find all files', async function() {
+			let response = await axios({
+				method: 'get',
+				url: `http://localhost:${port}/store1/$find`,
+			})
+
+			assert.equal(response.status, 200)
+			let lines = response.data.split('\n')
+			assert.equal(lines.length, 7)
+		})
+		it('find jpg files', async function() {
+			let response = await axios({
+				method: 'get',
+				url: `http://localhost:${port}/store1/$find?namePattern=/\\.JPG$/i`,
+			})
+
+			assert.equal(response.status, 200)
+			let lines = response.data.split('\n').filter(line => !!line)
+			assert.equal(lines.length, 3)
+		})
 		it('delete file', async function() {
 			await axios({
 				method: 'delete',
@@ -395,7 +415,7 @@ async function addTests() {
 			})
 
 		})
-		it('delete directory', async function() {
+		it('delete already deleted directory', async function() {
 			await axios({
 				method: 'delete',
 				url: `http://localhost:${port}/store1/dir2`
