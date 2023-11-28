@@ -373,6 +373,16 @@ async function addTests() {
 			let lines = response.data.split('\n').filter(line => !!line)
 			assert.equal(lines.length, 3)
 		})
+		it('find directories', async function() {
+			let response = await axios({
+				method: 'get',
+				url: `http://localhost:${port}/store1/$find?file=false`,
+			})
+
+			assert.equal(response.status, 200)
+			let lines = response.data.split('\n')
+			assert.equal(lines.length, 2)
+		})
 		it('delete file', async function() {
 			await axios({
 				method: 'delete',
